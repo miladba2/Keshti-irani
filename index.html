@@ -177,6 +177,47 @@ body.light .rpt-btn:hover{border-color:#0066ff44;background:#f0f5ff;}
 .rpt-label{font-size:13px;font-weight:700;color:#e8edf2;display:block;}
 body.light .rpt-label{color:#1a202c;}
 .rpt-sub{font-size:11px;color:#8a95a3;display:block;margin-top:2px;}
+
+.rv-overlay{display:none;position:fixed;inset:0;background:#15191d;z-index:600;flex-direction:column;}
+.rv-overlay.on{display:flex;}
+body.light .rv-overlay{background:#f4f6f9;}
+.rv-header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#1e2329;border-bottom:1px solid #2d3748;flex-shrink:0;}
+body.light .rv-header{background:#fff;border-color:#e2e8f0;}
+.rv-back{background:#262d36;border:1px solid #2d3748;border-radius:8px;width:34px;height:34px;color:#e8edf2;font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.rv-back.show{display:flex;}
+body.light .rv-back{background:#f4f6f9;border-color:#e2e8f0;color:#1a202c;}
+.rv-title{flex:1;font-size:15px;font-weight:700;color:#e8edf2;}
+body.light .rv-title{color:#1a202c;}
+.rv-close{background:#262d36;border:1px solid #2d3748;border-radius:50%;width:32px;height:32px;color:#8a95a3;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+body.light .rv-close{background:#f4f6f9;border-color:#e2e8f0;color:#4a5568;}
+.rv-body{flex:1;overflow-y:auto;padding:14px;}
+.rv-footer{padding:14px 16px;background:#1e2329;border-top:1px solid #2d3748;flex-shrink:0;}
+body.light .rv-footer{background:#fff;border-color:#e2e8f0;}
+
+/* Report list items */
+.rv-item{background:#1e2329;border:1px solid #2d3748;border-radius:10px;padding:13px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.rv-item:hover{border-color:#0066ff44;}
+body.light .rv-item{background:#fff;border-color:#e2e8f0;}
+.rv-item.static{cursor:default;}
+.rv-item-row{display:flex;align-items:center;gap:11px;}
+.rv-item-body{flex:1;min-width:0;}
+.rv-item-title{font-weight:600;font-size:13px;color:#e8edf2;}
+body.light .rv-item-title{color:#1a202c;}
+.rv-item-sub{font-size:11px;color:#8a95a3;margin-top:3px;}
+.rv-item-amt{font-weight:700;font-size:14px;white-space:nowrap;}
+
+/* Summary box in report */
+.rv-summary{background:#1e2329;border:1px solid #2d3748;border-radius:10px;padding:14px;margin-bottom:14px;}
+body.light .rv-summary{background:#fff;border-color:#e2e8f0;}
+.rv-sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d3748;}
+body.light .rv-sum-row{border-color:#f0f4f8;}
+.rv-sum-row:last-child{border:none;}
+.rv-sum-label{font-size:12px;color:#8a95a3;}
+.rv-sum-val{font-size:14px;font-weight:700;}
+
+/* Section header inside report */
+.rv-section{font-size:11px;font-weight:700;color:#8a95a3;text-transform:uppercase;letter-spacing:.4px;margin:16px 0 10px;}
+.rv-section:first-child{margin-top:0;}
 </style>
 </head>
 <body>
@@ -204,33 +245,29 @@ body.light .rpt-label{color:#1a202c;}
 
     <!-- Report Buttons -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <button class="rpt-btn" onclick="exportLedgerXLS()">
+      <button class="rpt-btn" onclick="openReportView('ledger')">
         <div class="rpt-icon" style="background:#0066ff20;color:#0066ff">&#128203;</div>
         <div class="rpt-label">دفتر معین کل</div>
-        <div class="rpt-sub">اکسل</div>
+        <div class="rpt-sub">مشاهده</div>
       </button>
-      <button class="rpt-btn" onclick="exportUnitsXLS()">
+      <button class="rpt-btn" onclick="openReportView('units')">
         <div class="rpt-icon" style="background:#7c5cfc20;color:#7c5cfc">&#127962;</div>
         <div class="rpt-label">گزارش واحدها</div>
-        <div class="rpt-sub">اکسل</div>
+        <div class="rpt-sub">مشاهده</div>
       </button>
-      <button class="rpt-btn" onclick="exportExpensesXLS()">
+      <button class="rpt-btn" onclick="openReportView('expenses')">
         <div class="rpt-icon" style="background:#ff3b3020;color:#ff3b30">&#128184;</div>
         <div class="rpt-label">گزارش هزینه‌ها</div>
-        <div class="rpt-sub">اکسل</div>
+        <div class="rpt-sub">مشاهده</div>
       </button>
-      <button class="rpt-btn" onclick="exportReceiptsXLS()">
+      <button class="rpt-btn" onclick="openReportView('receipts')">
         <div class="rpt-icon" style="background:#00c85320;color:#00c853">&#128176;</div>
         <div class="rpt-label">گزارش دریافت‌ها</div>
-        <div class="rpt-sub">اکسل</div>
+        <div class="rpt-sub">مشاهده</div>
       </button>
     </div>
 
-    <!-- Unit status -->
-    <div class="card">
-      <div class="ctit">وضعیت واحدها</div>
-      <div id="dashUnits"></div>
-    </div>
+
   </div>
   <div class="pg" id="page-units" style="padding-bottom:90px">
     <div class="topbar"><h2>واحدها</h2></div>
@@ -292,6 +329,19 @@ body.light .rpt-label{color:#1a202c;}
 </div>
 
 <button class="fab" id="fabBtn" onclick="fabClick()">+</button>
+
+<!-- REPORT VIEW (full screen) -->
+<div class="rv-overlay" id="reportView">
+  <div class="rv-header">
+    <button class="rv-back" id="rvBackBtn" onclick="reportViewBack()">&#8250;</button>
+    <div class="rv-title" id="rvTitle">گزارش</div>
+    <button class="rv-close" onclick="closeReportView()">&#215;</button>
+  </div>
+  <div class="rv-body" id="rvBody"></div>
+  <div class="rv-footer" id="rvFooter">
+    <button class="btn bb" style="width:100%" id="rvDownloadBtn" onclick="rvDownload()">&#8681; دانلود اکسل</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <div class="ov" id="unitOv">
@@ -898,19 +948,7 @@ function renderDashboard(){
     sc('دریافت‌ها',fmt(tR),'#00c853',toFa(S.receipts.length)+' مورد')+
     sc('موجودی',fmt(Math.abs(bal)),bal>=0?'#00c853':'#ff3b30',bal>=0?'مثبت':'کسری');
 // chart removed - now in report buttons
-  var uh='';
-  for(var i=0;i<S.units.length;i++){
-    var u=S.units[i];
-    uh+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #2d3748;cursor:pointer;border-radius:6px;padding-right:4px" data-action="xlsUnit" data-id="'+u.id+'" title="دانلود اکسل واحد">';
-    uh+='<div style="width:6px;height:6px;border-radius:50%;background:'+(u.debt>0?'#ff3b30':'#00c853')+';flex-shrink:0"></div>';
-    uh+='<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#e8edf2">'+u.unit+'</div>';
-    uh+='<div style="font-size:11px;color:#8a95a3">'+u.owner+'</div></div>';
-    if(u.debt>0)uh+='<div style="font-size:12px;font-weight:700;color:#ff3b30;margin-left:6px">'+fmt(u.debt)+'</div>';
-    else uh+='<div class="badge" style="background:#00c85318;color:#00c853;margin-left:6px">تسویه</div>';
-    uh+='<div style="font-size:10px;color:#4a5568;flex-shrink:0">&#8681; XLS</div>';
-    uh+='</div>';
-  }
-  document.getElementById('dashUnits').innerHTML=uh||'<div style="color:#8a95a3;font-size:12px">واحدی ثبت نشده</div>';
+
 }
 
 // ═══ EXCEL + PDF EXPORT ═══
@@ -1035,7 +1073,7 @@ function makeCSV(title, headers, rows, summary){
   lines.push(esc('ساختمان: '+(S.building.name||''))+',,,');
   lines.push(esc('تاریخ تهیه: '+fmtJDate(todayJ().y,todayJ().m,todayJ().d))+',,,');
   lines.push('');
-  lines.push(headers.map(esc).join(','));
+  if(headers.length) lines.push(headers.map(esc).join(','));
   for(var i=0;i<rows.length;i++) lines.push(rows[i].map(esc).join(','));
   lines.push('');
   for(var i=0;i<summary.length;i++) lines.push(summary[i].map(esc).join(','));
@@ -1049,22 +1087,270 @@ function dlCSV(csv, filename){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
+var tLabelMap={cash:'نقدی',card:'کارت',transfer:'انتقال'};
+
+// ══════════════ REPORT VIEW STATE ══════════════
+var RV = { type:'', unitId:0 };
+
+function openReportView(type){
+  RV.type = type;
+  RV.unitId = 0;
+  document.getElementById('reportView').classList.add('on');
+  renderReportView();
+}
+function closeReportView(){
+  document.getElementById('reportView').classList.remove('on');
+}
+function reportViewBack(){
+  if(RV.unitId){
+    RV.unitId = 0;
+    renderReportView();
+  } else {
+    closeReportView();
+  }
+}
+
+function renderReportView(){
+  var titles = {ledger:'دفتر معین کل', units:'گزارش واحدها', expenses:'گزارش هزینه‌ها', receipts:'گزارش دریافت‌ها'};
+  var backBtn = document.getElementById('rvBackBtn');
+  var dlBtn = document.getElementById('rvDownloadBtn');
+
+  if(RV.type==='units' && RV.unitId){
+    // ── Single unit detail view ──
+    var u = getUnit(RV.unitId);
+    document.getElementById('rvTitle').textContent = u ? u.unit : 'واحد';
+    backBtn.classList.add('show');
+    dlBtn.style.display='block';
+    document.getElementById('rvBody').innerHTML = buildUnitDetailHTML(u);
+    return;
+  }
+
+  document.getElementById('rvTitle').textContent = titles[RV.type] || 'گزارش';
+  backBtn.classList.remove('show');
+  dlBtn.style.display='block';
+
+  if(RV.type==='units'){
+    document.getElementById('rvBody').innerHTML = buildUnitsListHTML();
+  } else if(RV.type==='expenses'){
+    document.getElementById('rvBody').innerHTML = buildExpensesHTML();
+  } else if(RV.type==='receipts'){
+    document.getElementById('rvBody').innerHTML = buildReceiptsHTML();
+  } else if(RV.type==='ledger'){
+    document.getElementById('rvBody').innerHTML = buildLedgerHTML();
+  }
+}
+
+// ── UNITS LIST (tap a unit to drill in) ──
+function buildUnitsListHTML(){
+  var h='';
+  var totalDebt=0,totalRec=0;
+  for(var i=0;i<S.units.length;i++){
+    var u=S.units[i];
+    var uRec=S.receipts.filter(function(r){return r.unitId==u.id;}).reduce(function(s,r){return s+r.amount;},0);
+    totalDebt+=u.debt; totalRec+=uRec;
+  }
+  h+='<div class="rv-summary">';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">تعداد واحدها</span><span class="rv-sum-val">'+toFa(S.units.length)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع بدهی</span><span class="rv-sum-val" style="color:#ff3b30">'+fmt(totalDebt)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع دریافت‌ها</span><span class="rv-sum-val" style="color:#00c853">'+fmt(totalRec)+'</span></div>';
+  h+='</div>';
+  h+='<div class="rv-section">واحدها &nbsp;(برای مشاهده جزئیات لمس کنید)</div>';
+  for(var i=0;i<S.units.length;i++){
+    var u=S.units[i];
+    h+='<div class="rv-item" onclick="viewUnitDetail('+u.id+')">';
+    h+='<div class="rv-item-row">';
+    h+='<div class="rv-item-body">';
+    h+='<div class="rv-item-title">'+u.unit+'</div>';
+    h+='<div class="rv-item-sub">'+u.owner+' · طبقه '+toFa(u.floor)+'</div>';
+    h+='</div>';
+    if(u.debt>0) h+='<div class="rv-item-amt" style="color:#ff3b30">'+fmt(u.debt)+'</div>';
+    else h+='<span class="badge" style="background:#00c85318;color:#00c853">تسویه</span>';
+    h+='<span style="color:#4a5568;font-size:16px;margin-right:2px">&#8249;</span>';
+    h+='</div></div>';
+  }
+  return h;
+}
+function viewUnitDetail(id){
+  RV.unitId = id;
+  renderReportView();
+}
+function buildUnitDetailHTML(u){
+  if(!u) return '<div style="text-align:center;padding:40px;color:#8a95a3">واحد یافت نشد</div>';
+  var recs = S.receipts.filter(function(r){return r.unitId==u.id;});
+  var tR = recs.reduce(function(s,r){return s+r.amount;},0);
+  var h='';
+  h+='<div class="rv-summary">';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">مالک</span><span class="rv-sum-val">'+u.owner+'</span></div>';
+  if(u.phone) h+='<div class="rv-sum-row"><span class="rv-sum-label">تماس</span><span class="rv-sum-val">'+u.phone+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">طبقه / متراژ</span><span class="rv-sum-val">'+toFa(u.floor)+' / '+toFa(u.area)+' م²</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">بدهی جاری</span><span class="rv-sum-val" style="color:'+(u.debt>0?'#ff3b30':'#00c853')+'">'+(u.debt>0?fmt(u.debt):'تسویه')+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع دریافت‌ها</span><span class="rv-sum-val" style="color:#00c853">'+fmt(tR)+'</span></div>';
+  h+='</div>';
+  h+='<div class="rv-section">تراکنش‌های دریافتی</div>';
+  if(!recs.length){
+    h+='<div style="text-align:center;padding:24px;color:#8a95a3;font-size:13px">دریافتی ثبت نشده</div>';
+  } else {
+    for(var i=0;i<recs.length;i++){
+      var r=recs[i];
+      h+='<div class="rv-item static"><div class="rv-item-row">';
+      h+='<div class="rv-item-body"><div class="rv-item-title">'+r.desc+'</div>';
+      h+='<div class="rv-item-sub">'+r.date+' · '+(tLabelMap[r.type]||r.type)+'</div></div>';
+      h+='<div class="rv-item-amt" style="color:#00c853">'+fmt(r.amount)+'</div>';
+      h+='</div></div>';
+    }
+  }
+  return h;
+}
+
+// ── EXPENSES ──
+function buildExpensesHTML(){
+  var total=0;
+  for(var i=0;i<S.expenses.length;i++) total+=S.expenses[i].amount;
+  var h='';
+  h+='<div class="rv-summary">';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">تعداد رکورد</span><span class="rv-sum-val">'+toFa(S.expenses.length)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع کل هزینه‌ها</span><span class="rv-sum-val" style="color:#ff3b30">'+fmt(total)+'</span></div>';
+  h+='</div>';
+  // by category breakdown
+  h+='<div class="rv-section">تفکیک بر اساس دسته‌بندی</div>';
+  h+='<div class="rv-summary">';
+  for(var i=0;i<S.cats.length;i++){
+    var c=S.cats[i],ct=0;
+    for(var j=0;j<S.expenses.length;j++){if(S.expenses[j].cat===c.name)ct+=S.expenses[j].amount;}
+    if(ct>0){
+      h+='<div class="rv-sum-row"><span class="rv-sum-label"><span class="dot" style="background:'+c.color+'"></span>'+c.name+'</span><span class="rv-sum-val" style="color:'+c.color+'">'+fmt(ct)+'</span></div>';
+    }
+  }
+  h+='</div>';
+  h+='<div class="rv-section">جزئیات تراکنش‌ها</div>';
+  if(!S.expenses.length){
+    h+='<div style="text-align:center;padding:24px;color:#8a95a3;font-size:13px">هزینه‌ای ثبت نشده</div>';
+  } else {
+    for(var i=0;i<S.expenses.length;i++){
+      var e=S.expenses[i],cat=getCat(e.cat);
+      h+='<div class="rv-item static"><div class="rv-item-row">';
+      h+='<div class="rv-item-body"><div class="rv-item-title">'+(e.title||e.cat)+'</div>';
+      h+='<div class="rv-item-sub"><span class="dot" style="background:'+cat.color+'"></span>'+e.cat+' · '+e.date+'</div></div>';
+      h+='<div class="rv-item-amt" style="color:#ff3b30">'+fmt(e.amount)+'</div>';
+      h+='</div></div>';
+    }
+  }
+  return h;
+}
+
+// ── RECEIPTS ──
+function buildReceiptsHTML(){
+  var total=0;
+  for(var i=0;i<S.receipts.length;i++) total+=S.receipts[i].amount;
+  var h='';
+  h+='<div class="rv-summary">';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">تعداد رکورد</span><span class="rv-sum-val">'+toFa(S.receipts.length)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع کل دریافت‌ها</span><span class="rv-sum-val" style="color:#00c853">'+fmt(total)+'</span></div>';
+  h+='</div>';
+  h+='<div class="rv-section">جزئیات تراکنش‌ها</div>';
+  if(!S.receipts.length){
+    h+='<div style="text-align:center;padding:24px;color:#8a95a3;font-size:13px">دریافتی ثبت نشده</div>';
+  } else {
+    for(var i=0;i<S.receipts.length;i++){
+      var r=S.receipts[i],u=getUnit(r.unitId);
+      h+='<div class="rv-item static"><div class="rv-item-row">';
+      h+='<div class="rv-item-body"><div class="rv-item-title">'+(u?u.unit+' · '+u.owner:'نامشخص')+'</div>';
+      h+='<div class="rv-item-sub">'+r.desc+' · '+r.date+' · '+(tLabelMap[r.type]||r.type)+'</div></div>';
+      h+='<div class="rv-item-amt" style="color:#00c853">'+fmt(r.amount)+'</div>';
+      h+='</div></div>';
+    }
+  }
+  return h;
+}
+
+// ── LEDGER (ALL) ──
+function buildLedgerHTML(){
+  var tR=0,tE=0;
+  for(var i=0;i<S.receipts.length;i++) tR+=S.receipts[i].amount;
+  for(var i=0;i<S.expenses.length;i++) tE+=S.expenses[i].amount;
+  var bal=tR-tE;
+  var h='';
+  h+='<div class="rv-summary">';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع دریافت‌ها</span><span class="rv-sum-val" style="color:#00c853">'+fmt(tR)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">جمع هزینه‌ها</span><span class="rv-sum-val" style="color:#ff3b30">'+fmt(tE)+'</span></div>';
+  h+='<div class="rv-sum-row"><span class="rv-sum-label">تراز نهایی</span><span class="rv-sum-val" style="color:'+(bal>=0?'#00c853':'#ff3b30')+'">'+fmt(Math.abs(bal))+(bal>=0?' (مثبت)':' (کسری)')+'</span></div>';
+  h+='</div>';
+
+  h+='<div class="rv-section">دریافت‌ها</div>';
+  if(!S.receipts.length){
+    h+='<div style="text-align:center;padding:16px;color:#8a95a3;font-size:13px">دریافتی ثبت نشده</div>';
+  } else {
+    for(var i=0;i<S.receipts.length;i++){
+      var r=S.receipts[i],u=getUnit(r.unitId);
+      h+='<div class="rv-item static"><div class="rv-item-row">';
+      h+='<div class="rv-item-body"><div class="rv-item-title">'+(u?u.unit+' · '+u.owner:'نامشخص')+'</div>';
+      h+='<div class="rv-item-sub">'+r.desc+' · '+r.date+'</div></div>';
+      h+='<div class="rv-item-amt" style="color:#00c853">'+fmt(r.amount)+'</div>';
+      h+='</div></div>';
+    }
+  }
+
+  h+='<div class="rv-section">هزینه‌ها</div>';
+  if(!S.expenses.length){
+    h+='<div style="text-align:center;padding:16px;color:#8a95a3;font-size:13px">هزینه‌ای ثبت نشده</div>';
+  } else {
+    for(var i=0;i<S.expenses.length;i++){
+      var e=S.expenses[i],cat=getCat(e.cat);
+      h+='<div class="rv-item static"><div class="rv-item-row">';
+      h+='<div class="rv-item-body"><div class="rv-item-title">'+(e.title||e.cat)+'</div>';
+      h+='<div class="rv-item-sub"><span class="dot" style="background:'+cat.color+'"></span>'+e.cat+' · '+e.date+'</div></div>';
+      h+='<div class="rv-item-amt" style="color:#ff3b30">'+fmt(e.amount)+'</div>';
+      h+='</div></div>';
+    }
+  }
+  return h;
+}
+
+// ══════════════ DOWNLOAD (called from footer button) ══════════════
+function rvDownload(){
+  if(RV.type==='units' && RV.unitId){
+    exportSingleUnitXLS(RV.unitId);
+  } else if(RV.type==='units'){
+    exportUnitsXLS();
+  } else if(RV.type==='expenses'){
+    exportExpensesXLS();
+  } else if(RV.type==='receipts'){
+    exportReceiptsXLS();
+  } else if(RV.type==='ledger'){
+    exportLedgerXLS();
+  }
+}
+
+function exportSingleUnitXLS(unitId){
+  var u=getUnit(unitId);
+  if(!u)return;
+  var recs=S.receipts.filter(function(r){return r.unitId==unitId;});
+  var tR=0;recs.forEach(function(r){tR+=r.amount;});
+  var rows=[];
+  for(var i=0;i<recs.length;i++){
+    var r=recs[i];
+    rows.push([toFa(i+1),r.date,r.desc,tLabelMap[r.type]||r.type,r.amount]);
+  }
+  var csv=makeCSV('گزارش واحد '+u.unit+' - '+u.owner,['ردیف','تاریخ','شرح','نوع','مبلغ'],rows,[
+    ['','','','جمع دریافت‌ها',tR],
+    ['','','','بدهی جاری',u.debt]
+  ]);
+  dlCSV(csv,'unit-'+u.unit+'.csv');
+}
+
 function exportLedgerXLS(){
   var tR=0,tE=0;
   for(var i=0;i<S.receipts.length;i++) tR+=S.receipts[i].amount;
   for(var i=0;i<S.expenses.length;i++) tE+=S.expenses[i].amount;
-  var tLabel={cash:'نقدی',card:'کارت',transfer:'انتقال'};
   var rows=[];
-  // receipts section
   rows.push(['دریافت‌ها','','','','','']);
   rows.push(['ردیف','تاریخ','واحد','شرح','نوع','مبلغ']);
   for(var i=0;i<S.receipts.length;i++){
     var r=S.receipts[i],u=getUnit(r.unitId);
-    rows.push([toFa(i+1),r.date,u?u.unit:'نامشخص',r.desc,tLabel[r.type]||r.type,r.amount]);
+    rows.push([toFa(i+1),r.date,u?u.unit:'نامشخص',r.desc,tLabelMap[r.type]||r.type,r.amount]);
   }
   rows.push(['','','','','جمع دریافت‌ها',tR]);
   rows.push(['','','','','','']);
-  // expenses section
   rows.push(['هزینه‌ها','','','','','']);
   rows.push(['ردیف','تاریخ','دسته','توضیحات','','مبلغ']);
   for(var i=0;i<S.expenses.length;i++){
@@ -1074,8 +1360,7 @@ function exportLedgerXLS(){
   rows.push(['','','','','جمع هزینه‌ها',tE]);
   rows.push(['','','','','','']);
   rows.push(['','','','','تراز (دریافت - هزینه)',tR-tE]);
-
-  var csv = makeCSV('دفتر معین کل',['','','','','',''],rows,[]);
+  var csv = makeCSV('دفتر معین کل',[],rows,[]);
   dlCSV(csv,'ledger-'+toFa(todayJ().y)+'.csv');
 }
 
@@ -1089,8 +1374,7 @@ function exportUnitsXLS(){
     totalDebt+=u.debt; totalRec+=uRec;
     rows.push([toFa(i+1),u.unit,u.owner,toFa(u.floor),toFa(u.area),u.debt,u.debt>0?'بدهکار':'تسویه',uRec]);
   }
-  var csv = makeCSV('گزارش تفکیکی واحدها',[],[],[])+'\r\n';
-  csv = makeCSV('گزارش تفکیکی واحدها',['','','','','','','',''],rows,[
+  var csv = makeCSV('گزارش تفکیکی واحدها',[],rows,[
     ['','','','','جمع بدهی','','',totalDebt],
     ['','','','','جمع دریافت‌ها','','',totalRec]
   ]);
@@ -1099,13 +1383,11 @@ function exportUnitsXLS(){
 
 function exportExpensesXLS(){
   var rows=[];
-  rows.push(['ردیف','تاریخ','دسته','توضیحات','مبلغ']);
   var total=0;
   for(var i=0;i<S.expenses.length;i++){
     var e=S.expenses[i];total+=e.amount;
     rows.push([toFa(i+1),e.date,e.cat,e.title||'',e.amount]);
   }
-  // per category summary
   var catSummary=[];
   for(var i=0;i<S.cats.length;i++){
     var c=S.cats[i],ct=0;
@@ -1113,19 +1395,17 @@ function exportExpensesXLS(){
     if(ct>0) catSummary.push(['',c.name,'','',ct]);
   }
   var summary=[['','','','جمع کل',total],['','','','','']].concat(catSummary);
-  dlCSV(makeCSV('گزارش هزینه‌ها',['','','','',''],rows,summary),'expenses-report.csv');
+  dlCSV(makeCSV('گزارش هزینه‌ها',['ردیف','تاریخ','دسته','توضیحات','مبلغ'],rows,summary),'expenses-report.csv');
 }
 
 function exportReceiptsXLS(){
-  var tLabel={cash:'نقدی',card:'کارت',transfer:'انتقال'};
   var rows=[];
-  rows.push(['ردیف','تاریخ','واحد','مالک','شرح','نوع','مبلغ']);
   var total=0;
   for(var i=0;i<S.receipts.length;i++){
     var r=S.receipts[i],u=getUnit(r.unitId);total+=r.amount;
-    rows.push([toFa(i+1),r.date,u?u.unit:'نامشخص',u?u.owner:'',r.desc,tLabel[r.type]||r.type,r.amount]);
+    rows.push([toFa(i+1),r.date,u?u.unit:'نامشخص',u?u.owner:'',r.desc,tLabelMap[r.type]||r.type,r.amount]);
   }
-  dlCSV(makeCSV('گزارش دریافت‌ها',['','','','','','',''],rows,[['','','','','','جمع کل',total]]),'receipts-report.csv');
+  dlCSV(makeCSV('گزارش دریافت‌ها',['ردیف','تاریخ','واحد','مالک','شرح','نوع','مبلغ'],rows,[['','','','','','جمع کل',total]]),'receipts-report.csv');
 }
 
 // ═══ FAB ═══
