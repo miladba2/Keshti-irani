@@ -1,0 +1,33 @@
+name: Supabase Keep-Alive
+
+# این وظیفه هفته‌ای دو بار به پایگاه داده Supabase یک درخواست ساده می‌فرستد
+# تا پروژه به‌خاطر «۷ روز عدم فعالیت» توسط Supabase به‌صورت خودکار Pause نشود.
+
+on:
+  schedule:
+    # هر یکشنبه و پنج‌شنبه، ساعت ۰۰:۰۰ به وقت جهانی (UTC) اجرا می‌شود.
+    # فاصله این دو روز کمتر از ۷ روز است، پس همیشه یک حاشیه امن وجود دارد.
+    - cron: '0 0 * * 0,4'
+  workflow_dispatch: {}   # امکان اجرای دستی از تب Actions گیت‌هاب، برای تست
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase project (keep-alive)
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/settings?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          echo "پاسخ Supabase: HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ پروژه با موفقیت پینگ شد."
+          else
+            echo "⚠️ کد پاسخ غیرمنتظره بود، اما درخواست ارسال شد (که برای جلوگیری از Pause شدن کافی است)."
+          fi
+        env:
+          # این مقادیر همان آدرس و کلید anon (publishable) پروژه شما هستند -
+          # همان‌هایی که در خود نرم‌افزار هم استفاده می‌شوند و برای این منظور امن هستند.
+          SUPABASE_URL: https://digdsbzgxjpqqqasvtoi.supabase.co
+          SUPABASE_KEY: sb_publishable_BLpxwdOmIwDqeAd0Q6JCfA_BvKs0jWQ
