@@ -1,1 +1,68 @@
+name: Supabase Keep-Alive
+
+# طبق مستندات رسمی Supabase، پروژه رایگان وقتی Pause می‌شود که «طی ۷ روز، تعداد کافی
+# کوئری به دیتابیس» نخورده باشد؛ یعنی چند درخواست در روز لازم است، نه یک درخواست در هفته.
+# این وظیفه روزی چهار بار، چند جدول اصلی را می‌خواند تا پروژه همیشه فعال بماند.
+# اگر درخواستی ناموفق باشد، اجرا قرمز (Failed) می‌شود و گیت‌هاب برایتان ایمیل می‌فرستد.
+
+on:
+  schedule:
+    # هر ۶ ساعت (دقیقه ۱۷ ساعت‌های ۰۰، ۰۶، ۱۲ و ۱۸ به وقت جهانی).
+    # دقیقه ۱۷ عمداً انتخاب شده تا با ازدحام ابتدای ساعت گیت‌هاب برخورد نکند.
+    - cron: '17 */6 * * *'
+  workflow_dispatch: {}   # امکان اجرای دستی از تب Actions برای تست
+
+permissions:
+  contents: write         # فقط برای «ضربان ماهانه» پایین (جلوگیری از غیرفعال شدن زمان‌بندی)
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query the project's tables (keep-alive)
+        env:
+          # آدرس و کلید عمومی (publishable) همان پروژه‌ای که نرم‌افزار به آن وصل است.
+          SUPABASE_URL: https://digdsbzgxjpqqqasvtoi.supabase.co
+          SUPABASE_KEY: sb_publishable_BLpxwdOmIwDqeAd0Q6JCfA_BvKs0jWQ
+        run: |
+          fail=0
+          for table in settings units receipts expenses charges persons; do
+            # طبق مستندات Supabase، کلید publishable فقط در هدر apikey فرستاده می‌شود (نه Authorization)
+            code=$(curl -sS --max-time 30 -o /tmp/body.txt -w "%{http_code}" \
+              "${SUPABASE_URL}/rest/v1/${table}?select=id&limit=1" \
+              -H "apikey: ${SUPABASE_KEY}") || code=000
+            echo "${table}: HTTP ${code}"
+            if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+              echo "::error::Request to '${table}' failed with HTTP ${code}"
+              cat /tmp/body.txt 2>/dev/null || true
+              echo
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "At least one request failed - the project may NOT be counted as active."
+            exit 1
+          fi
+          echo "All requests succeeded - project activity recorded."
+
+      # گیت‌هاب زمان‌بندی را در مخزن‌های عمومی پس از ۶۰ روز «بدون فعالیت» (کامیت) خودکار غیرفعال می‌کند.
+      # یک کامیت کوچک در اول هر ماه این اتفاق را جلوگیری می‌کند.
+      - name: Checkout (for the monthly heartbeat)
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        uses: actions/checkout@v4
+
+      - name: Monthly heartbeat commit
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          if [ "$(date -u +%d)" = "01" ] && [ "$(date -u +%H)" -lt 6 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/keepalive-heartbeat.txt
+            git add .github/keepalive-heartbeat.txt
+            git commit -m "chore: keep-alive heartbeat"
+            git push
+          fi
 
